@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Knowledge Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .progress-bar {
+            background: #f0f0f0;
+            height: 8px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 30px;
+            transition: transform 0.3s ease;
+            font-weight: bold;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .score-number {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 150px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .feedback {
+            font-size: 1.3em;
+            color: #333;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .restart-btn, .view-answers-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .restart-btn:hover, .view-answers-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .quiz-review {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .quiz-review.show {
+            display: block;
+        }
+
+        .review-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .option.user-answer {
+            border: 3px solid #ffc107;
+            position: relative;
+        }
+
+        .option.user-answer::after {
+            content: "Your Answer";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ffc107;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Knowledge Quiz</h1>
+        <p class="subtitle">Test your understanding of Artificial Intelligence</p>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <form id="quizForm">
+            <!-- Questions will be inserted here -->
+        </form>
+
+        <button type="button" class="submit-btn" id="submitBtn" disabled>Submit Quiz</button>
+
+        <div class="results" id="results">
+            <h2 class="feedback" id="feedback"></h2>
+            <div class="score-circle">
+                <div class="score-number" id="scoreNumber"></div>
+                <div class="score-label">Final Score</div>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="correctCount"></div>
+                    <div class="stat-label">Correct Answers</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="incorrectCount"></div>
+                    <div class="stat-label">Incorrect Answers</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="totalQuestions"></div>
+                    <div class="stat-label">Total Questions</div>
+                </div>
+            </div>
+            <div class="buttons-container">
+                <button class="view-answers-btn" id="viewAnswersBtn">📝 View Answers</button>
+                <button class="restart-btn" onclick="location.reload()">🔄 Take Quiz Again</button>
+            </div>
+        </div>
+
+        <div class="quiz-review" id="quizReview">
+            <div class="review-header">📋 Answer Review</div>
+            <div id="reviewContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const originalQuestions = [
+            {
+                question: "What does AI stand for?",
+                options: ["Artificial Intelligence", "Automated Information", "Advanced Integration", "Algorithmic Interface"],
+                correct: 0
+            },
+            {
+                question: "Which of the following is a type of machine learning?",
+                options: ["Supervised Learning", "Random Learning", "Chaotic Learning", "Manual Learning"],
+                correct: 0
+            },
+            {
+                question: "What is a neural network inspired by?",
+                options: ["Computer circuits", "The human brain", "Mathematical equations", "Database structures"],
+                correct: 1
+            },
+            {
+                question: "What is the Turing Test designed to measure?",
+                options: ["Computer speed", "Machine intelligence", "Data storage capacity", "Network bandwidth"],
+                correct: 1
+            },
+            {
+                question: "Which company developed ChatGPT?",
+                options: ["Google", "Microsoft", "OpenAI", "Meta"],
+                correct: 2
+            },
+            {
+                question: "What does NLP stand for in AI?",
+                options: ["Neural Language Processing", "Natural Language Programming", "Natural Language Processing", "Network Learning Protocol"],
+                correct: 2
+            },
+            {
+                question: "Deep learning is a subset of which technology?",
+                options: ["Blockchain", "Machine Learning", "Cloud Computing", "Quantum Computing"],
+                correct: 1
+            },
+            {
+                question: "What is the primary goal of reinforcement learning?",
+                options: ["Classify data", "Learn through rewards and penalties", "Generate text", "Store information"],
+                correct: 1
+            },
+            {
+                question: "Which of these is an AI application?",
+                options: ["All of the above", "Image recognition", "Speech recognition", "Autonomous vehicles"],
+                correct: 0
+            },
+            {
+                question: "What is overfitting in machine learning?",
+                options: ["Model performs too well on training data but poorly on new data", "Model is too simple", "Model trains too quickly", "Model uses too little data"],
+                correct: 0
+            }
+        ];
+
+        // Function to shuffle array
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Shuffle options for each question
+        function shuffleQuestions(questions) {
+            return questions.map(q => {
+                const correctAnswer = q.options[q.correct];
+                const shuffledOptions = shuffleArray(q.options);
+                const newCorrectIndex = shuffledOptions.indexOf(correctAnswer);
+                
+                return {
+                    question: q.question,
+                    options: shuffledOptions,
+                    correct: newCorrectIndex
+                };
+            });
+        }
+
+        let questions = shuffleQuestions(originalQuestions);
+        let selectedAnswers = {};
+        const quizForm = document.getElementById('quizForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressFill = document.getElementById('progressFill');
+
+        // Generate quiz questions
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-container';
+            questionDiv.innerHTML = `
+                <div class="question-header">
+                    <div class="question-number">${index + 1}</div>
+                    <div class="question-text">${q.question}</div>
+                </div>
+                <div class="options">
+                    ${q.options.map((option, optIndex) => `
+                        <div class="option" data-question="${index}" data-option="${optIndex}">
+                            ${option}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            quizForm.appendChild(questionDiv);
+        });
+
+        // Handle option selection
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionIndex = this.dataset.question;
+                const optionIndex = this.dataset.option;
+                
+                // Remove selection from other options in same question
+                document.querySelectorAll(`.option[data-question="${questionIndex}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Select this option
+                this.classList.add('selected');
+                selectedAnswers[questionIndex] = parseInt(optionIndex);
+                
+                // Update progress
+                updateProgress();
+                
+                // Enable submit button if all questions answered
+                if (Object.keys(selectedAnswers).length === questions.length) {
+                    submitBtn.disabled = false;
+                }
+            });
+        });
+
+        function updateProgress() {
+            const progress = (Object.keys(selectedAnswers).length / questions.length) * 100;
+            progressFill.style.width = progress + '%';
+        }
+
+        submitBtn.addEventListener('click', function() {
+            let correct = 0;
+            let incorrect = 0;
+
+            questions.forEach((q, index) => {
+                const userAnswer = selectedAnswers[index];
+                const correctAnswer = q.correct;
+                const options = document.querySelectorAll(`.option[data-question="${index}"]`);
+                
+                options.forEach((option, optIndex) => {
+                    option.classList.add('disabled');
+                    if (optIndex === correctAnswer) {
+                        option.classList.add('correct');
+                    }
+                    if (optIndex === userAnswer && userAnswer !== correctAnswer) {
+                        option.classList.add('incorrect');
+                    }
+                });
+
+                if (userAnswer === correctAnswer) {
+                    correct++;
+                } else {
+                    incorrect++;
+                }
+            });
+
+            const score = Math.round((correct / questions.length) * 100);
+            
+            // Show results
+            document.getElementById('scoreNumber').textContent = score + '%';
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('incorrectCount').textContent = incorrect;
+            document.getElementById('totalQuestions').textContent = questions.length;
+            
+            let feedback = '';
+            if (score >= 90) {
+                feedback = '🌟 Excellent! You\'re an AI expert!';
+            } else if (score >= 70) {
+                feedback = '👏 Great job! Strong AI knowledge!';
+            } else if (score >= 50) {
+                feedback = '👍 Good effort! Keep learning!';
+            } else {
+                feedback = '📚 Keep studying! You\'ll improve!';
+            }
+            document.getElementById('feedback').textContent = feedback;
+            
+            document.getElementById('results').classList.add('show');
+            submitBtn.style.display = 'none';
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // View Answers Button
+        document.getElementById('viewAnswersBtn').addEventListener('click', function() {
+            const reviewContent = document.getElementById('reviewContent');
+            reviewContent.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const userAnswer = selectedAnswers[index];
+                const correctAnswer = q.correct;
+                const isCorrect = userAnswer === correctAnswer;
+
+                const questionReview = document.createElement('div');
+                questionReview.className = 'question-container';
+                questionReview.innerHTML = `
+                    <div class="question-header">
+                        <div class="question-number">${index + 1}</div>
+                        <div class="question-text">${q.question}</div>
+                    </div>
+                    <div class="options">
+                        ${q.options.map((option, optIndex) => {
+                            let classes = 'option disabled';
+                            if (optIndex === correctAnswer) {
+                                classes += ' correct';
+                            }
+                            if (optIndex === userAnswer && !isCorrect) {
+                                classes += ' incorrect user-answer';
+                            }
+                            if (optIndex === userAnswer && isCorrect) {
+                                classes += ' user-answer';
+                            }
+                            return `<div class="${classes}">${option}</div>`;
+                        }).join('')}
+                    </div>
+                `;
+                reviewContent.appendChild(questionReview);
+            });
+
+            document.getElementById('quizReview').classList.add('show');
+            document.getElementById('quizReview').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
